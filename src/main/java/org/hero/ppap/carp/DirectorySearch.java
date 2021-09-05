@@ -7,11 +7,13 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public class DirectorySearch {
-    static Stream<File> excelSearch(File file) {
+    static Stream<File> excelSearch(File file, String exclude) {
         try {
             if (file.isDirectory()) {
-                return Files.list(file.toPath()).map(Path::toFile)
-                        .flatMap(DirectorySearch::excelSearch);
+                return Files.list(file.toPath())
+                        .filter(it -> !it.normalize().toAbsolutePath().startsWith(exclude))
+                        .map(Path::toFile)
+                        .flatMap(it -> DirectorySearch.excelSearch(it, exclude));
             } else {
                 return Stream.of(file)
                         .filter(it -> it.getName().endsWith(".xlsx"));

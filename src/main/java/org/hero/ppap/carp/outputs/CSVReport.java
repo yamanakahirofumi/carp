@@ -5,6 +5,8 @@ import org.hero.ppap.carp.excel.CARPCell;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CSVReport implements Report {
@@ -12,6 +14,10 @@ public class CSVReport implements Report {
 
     CSVReport(File file) {
         this.file = file;
+    }
+
+    @Override
+    public void prepare(File target) {
         if (this.file.exists()) {
             this.file.delete();
         }
@@ -26,5 +32,10 @@ public class CSVReport implements Report {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Optional<Path> resultFile() {
+        return Optional.of(this.file.toPath());
     }
 }

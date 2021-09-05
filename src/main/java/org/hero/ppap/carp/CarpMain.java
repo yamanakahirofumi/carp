@@ -48,9 +48,10 @@ class CarpMain implements Callable<Integer> {
             redPenManager = new RedPenManager("/redpen-conf-ja.xml");
         }
         Report report = ReportFactory.create(type, resultFile);
+        report.prepare(file);
         Files.list(file.toPath())
                 .map(Path::toFile)
-                .flatMap(DirectorySearch::excelSearch)
+                .flatMap(it -> DirectorySearch.excelSearch(it, report.resultFile().map(Path::toString).orElse("-")))
                 .flatMap(ExcelSearch::execute)
                 .peek(it -> it.setMessage(redPenManager.validate(it.getValue())))
                 .forEach(report::write);
