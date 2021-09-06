@@ -1,5 +1,6 @@
 package org.hero.ppap.carp;
 
+import org.hero.ppap.carp.excel.poi.PoiSearch;
 import org.hero.ppap.carp.outputs.Report;
 import org.hero.ppap.carp.outputs.ReportFactory;
 import org.hero.ppap.carp.outputs.ResultType;
@@ -49,10 +50,11 @@ class CarpMain implements Callable<Integer> {
         }
         Report report = ReportFactory.create(type, resultFile);
         report.prepare(file);
+        ExcelSearch search = new PoiSearch();
         Files.list(file.toPath())
                 .map(Path::toFile)
                 .flatMap(it -> DirectorySearch.excelSearch(it, report.resultFile().map(Path::toString).orElse("-")))
-                .flatMap(ExcelSearch::execute)
+                .flatMap(search::execute)
                 .peek(it -> it.setMessage(redPenManager.validate(it.getValue())))
                 .forEach(report::write);
         return 0;
