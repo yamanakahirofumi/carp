@@ -13,6 +13,7 @@ import org.apache.poi.util.Units;
 import org.hero.ppap.carp.excel.CARPCell;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,7 +50,7 @@ public class ExcelReport implements Report {
             if (!resultFile.exists()) {
                 Files.copy(sourceFile.toPath(), resultFile.toPath());
             }
-            try (Workbook workbook = WorkbookFactory.create(resultFile)) {
+            try (Workbook workbook = WorkbookFactory.create(new FileInputStream(resultFile))) {
                 CreationHelper helper = workbook.getCreationHelper();
 
                 Cell sourceCell = cell.getCell();
