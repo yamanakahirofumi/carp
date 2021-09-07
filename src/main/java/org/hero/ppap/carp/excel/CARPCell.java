@@ -3,6 +3,7 @@ package org.hero.ppap.carp.excel;
 import cc.redpen.validator.ValidationError;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellReference;
+import org.hero.ppap.carp.excel.stax.CellPosition;
 
 import java.io.File;
 import java.util.List;
@@ -10,13 +11,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CARPCell {
-    private final Cell cell;
-    private final File file;
+    private final CellPosition cellPosition;
     private List<ValidationError> message;
 
     public CARPCell(Cell cell, File file) {
-        this.cell = cell;
-        this.file = file;
+        this.cellPosition = new CellPosition(file, cell.getSheet().getSheetName(),
+                cell.getSheet().getWorkbook().getSheetIndex(cell.getSheet()), cell.getRowIndex(), cell.getColumnIndex(),
+                new CellReference(cell).formatAsString(false), cell.getStringCellValue());
+    }
+
+    public CARPCell(CellPosition cellPosition) {
+        this.cellPosition = cellPosition;
     }
 
     public void setMessage(Stream<ValidationError> message) {
@@ -24,7 +29,7 @@ public class CARPCell {
     }
 
     public String getValue() {
-        return cell.getStringCellValue();
+        return this.cellPosition.sentence();
     }
 
     private String getPositionFromLineOffset(ValidationError validationError) {
@@ -33,21 +38,33 @@ public class CARPCell {
 
     public Stream<String> getDebug() {
         return this.message.stream().map(it ->
-                this.file.getName() + "," +
-                        this.cell.getSheet().getSheetName() + "," +
-                        new CellReference(this.cell).formatAsString(false) + "," +
+                this.cellPosition.file().getName() + "," +
+                        this.getSheetName() + "," +
+                        this.cellPosition.cellPosition() + "," +
                         this.getPositionFromLineOffset(it) + "," +
                         it.getLevel().toString() + "," +
                         it.getMessage() + "," +
-                        this.file.toPath().normalize().toAbsolutePath());
+                        this.cellPosition.file().toPath().normalize().toAbsolutePath());
+    }
+
+    public boolean isMessage() {
+        return this.message.size() > 0;
     }
 
     public File getFile() {
-        return this.file;
+        return this.cellPosition.file();
     }
 
-    public Cell getCell() {
-        return this.cell;
+    public String getSheetName() {
+        return this.cellPosition.sheetName();
+    }
+
+    public int getRowIndex() {
+        return this.cellPosition.rowNum();
+    }
+
+    public int getColumnIndex() {
+        return this.cellPosition.columnNum();
     }
 
     public String getPosition(int i) {

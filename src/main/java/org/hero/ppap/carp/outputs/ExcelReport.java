@@ -4,7 +4,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -53,10 +52,9 @@ public class ExcelReport implements Report {
             try (Workbook workbook = WorkbookFactory.create(new FileInputStream(resultFile))) {
                 CreationHelper helper = workbook.getCreationHelper();
 
-                Cell sourceCell = cell.getCell();
-                Sheet sheet = workbook.getSheet(sourceCell.getSheet().getSheetName());
-                Row row = sheet.getRow(sourceCell.getRowIndex());
-                Cell cell1 = row.getCell(sourceCell.getColumnIndex());
+                Sheet sheet = workbook.getSheet(cell.getSheetName());
+                Row row = sheet.getRow(cell.getRowIndex());
+                Cell cell1 = row.getCell(cell.getColumnIndex());
                 Comment cellComment = cell1.getCellComment();
 
                 StringBuilder sb = new StringBuilder();

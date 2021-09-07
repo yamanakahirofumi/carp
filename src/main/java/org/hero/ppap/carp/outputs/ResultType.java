@@ -8,11 +8,11 @@ public enum ResultType {
 
     private final String ext;
 
-    ResultType(String ext){
+    ResultType(String ext) {
         this.ext = ext;
     }
 
-    public String getExt(){
+    public String getExt() {
         return this.ext;
     }
 }

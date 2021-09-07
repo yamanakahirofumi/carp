@@ -1,6 +1,8 @@
 package org.hero.ppap.carp;
 
+import org.hero.ppap.carp.excel.CARPCell;
 import org.hero.ppap.carp.excel.poi.PoiSearch;
+import org.hero.ppap.carp.excel.stax.StaxSearch;
 import org.hero.ppap.carp.outputs.Report;
 import org.hero.ppap.carp.outputs.ReportFactory;
 import org.hero.ppap.carp.outputs.ResultType;
@@ -26,10 +28,13 @@ class CarpMain implements Callable<Integer> {
     private File configFile;
 
     @Option(names = {"-r", "--result_format"}, description = "Result Format. Choose ${COMPLETION-CANDIDATES}")
-    private ResultType type = ResultType.DISPLAY;
+    private final ResultType type = ResultType.DISPLAY;
 
     @Option(names = {"-o", "--output_file"}, description = "Output File Path")
     private File resultFile;
+
+    @Option(names = {"--no-poi"}, description = "It is Experimental feature.")
+    private boolean noPoi;
 
     @Override
     public Integer call() throws Exception {
@@ -50,12 +55,18 @@ class CarpMain implements Callable<Integer> {
         }
         Report report = ReportFactory.create(type, resultFile);
         report.prepare(file);
-        ExcelSearch search = new PoiSearch();
+        ExcelSearch search;
+        if (noPoi) {
+            search = new StaxSearch();
+        } else {
+            search = new PoiSearch();
+        }
         Files.list(file.toPath())
                 .map(Path::toFile)
                 .flatMap(it -> DirectorySearch.excelSearch(it, report.resultFile().map(Path::toString).orElse("-")))
                 .flatMap(search::execute)
                 .peek(it -> it.setMessage(redPenManager.validate(it.getValue())))
+                .filter(CARPCell::isMessage)
                 .forEach(report::write);
         return 0;
     }
