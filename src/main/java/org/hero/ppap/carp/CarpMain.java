@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 
-@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 1.0",
+@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 0.1.5-SNAPSHOT",
         description = "Personal Poi And redPen check tool.(Check excel files of A directory by RedPen.)")
 class CarpMain implements Callable<Integer> {
 
@@ -72,7 +72,7 @@ class CarpMain implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-        int exitCode = new CommandLine(new CarpMain()).execute(args);
+        int exitCode = new CommandLine(new CarpMain()).setCaseInsensitiveEnumValuesAllowed(true).execute(args);
         System.exit(exitCode);
     }
 }

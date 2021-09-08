@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class StaxSearch implements ExcelSearch {
+    private final Pattern p = Pattern.compile("([A-Z]+)([0-9]+)");
+
     @Override
     public Stream<CARPCell> execute(File file) {
         XMLStreamReader reader = null;
@@ -60,12 +62,16 @@ public class StaxSearch implements ExcelSearch {
                     if (reader.getName().getLocalPart().equals("si")) {
                         si = true;
                         sb = new StringBuilder();
+                    } else if (reader.getName().getLocalPart().equals("rPh")) {
+                        si = false;
                     }
                     break;
                 case XMLStreamConstants.END_ELEMENT:
                     if (reader.getName().getLocalPart().equals("si")) {
                         si = false;
                         result.add(sb.toString());
+                    } else if (reader.getName().getLocalPart().equals("rPh")) {
+                        si = true;
                     }
                     break;
                 case XMLStreamConstants.CHARACTERS:
@@ -81,13 +87,14 @@ public class StaxSearch implements ExcelSearch {
 
     private Map<Integer, String> getSheetInfo(XMLStreamReader reader) throws XMLStreamException {
         Map<Integer, String> result = new HashMap<>();
+        Integer num = 1;
         while (reader.hasNext()) {
             int eventType = reader.next();
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 if (reader.getName().getLocalPart().equals("sheet")) {
-                    Integer num = Integer.valueOf(reader.getAttributeValue("", "sheetId"));
                     String name = reader.getAttributeValue("", "name");
                     result.put(num, name);
+                    num++;
                 }
             }
         }
@@ -102,7 +109,6 @@ public class StaxSearch implements ExcelSearch {
         boolean value = false;
         String cellPosition = "";
         List<CellPosition> result = new LinkedList<>();
-        Pattern p = Pattern.compile("([A-Z]+)([0-9]+)");
         int sheetId = Integer.parseInt(path.getFileName().toString().split("\\.")[0].split("t")[1]);
         try {
             reader = factory.createXMLStreamReader(Files.newInputStream(fs.getPath(path.toString())));
@@ -114,7 +120,7 @@ public class StaxSearch implements ExcelSearch {
                         if (startLocalPart.equals("c")) {
                             cellPosition = reader.getAttributeValue("", "r");
                             cell = true;
-                            if (reader.getAttributeValue("", "t").equals("s")) {
+                            if (reader.getAttributeValue("", "t") != null && reader.getAttributeValue("", "t").equals("s")) {
                                 share = true;
                             }
                         } else if (startLocalPart.equals("v") && share) {
@@ -134,7 +140,7 @@ public class StaxSearch implements ExcelSearch {
                             int num = Integer.parseInt(reader.getText());
                             String[] position = p.matcher(cellPosition).replaceAll("$1,$2").split(",");
                             result.add(new CellPosition(file, sheetMap.get(sheetId), sheetId,
-                                    this.getNumber(position[0]) - 1, Integer.parseInt(position[1]) - 1, cellPosition,
+                                    Integer.parseInt(position[1]) - 1, this.getNumber(position[0]) - 1, cellPosition,
                                     stringList.get(num)));
                         }
                         break;

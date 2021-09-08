@@ -4,7 +4,7 @@ public enum ResultType {
     CSV(".csv"),
     DISPLAY(""),
     EXCEL("_xlsx"),
-    None("");
+    NONE("");
 
     private final String ext;
 

@@ -1,5 +1,6 @@
 package org.hero.ppap.carp.excel;
 
+import cc.redpen.parser.LineOffset;
 import cc.redpen.validator.ValidationError;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellReference;
@@ -7,6 +8,7 @@ import org.hero.ppap.carp.excel.stax.CellPosition;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,8 +34,8 @@ public class CARPCell {
         return this.cellPosition.sentence();
     }
 
-    private String getPositionFromLineOffset(ValidationError validationError) {
-        return validationError.getStartPosition().map(offset -> String.valueOf(offset.lineNum)).orElse("-");
+    private String getPositionFromLineOffset(Optional<LineOffset> lineOffset) {
+        return lineOffset.map(it -> String.valueOf(it.offset)).orElse("-");
     }
 
     public Stream<String> getDebug() {
@@ -41,7 +43,7 @@ public class CARPCell {
                 this.cellPosition.file().getName() + "," +
                         this.getSheetName() + "," +
                         this.cellPosition.cellPosition() + "," +
-                        this.getPositionFromLineOffset(it) + "," +
+                        this.getPositionFromLineOffset(it.getStartPosition()) + "," +
                         it.getLevel().toString() + "," +
                         it.getMessage() + "," +
                         this.cellPosition.file().toPath().normalize().toAbsolutePath());
@@ -67,8 +69,12 @@ public class CARPCell {
         return this.cellPosition.columnNum();
     }
 
-    public String getPosition(int i) {
-        return this.getPositionFromLineOffset(this.message.get(i));
+    public String getStartPosition(int i) {
+        return this.getPositionFromLineOffset(this.message.get(i).getStartPosition());
+    }
+
+    public String getEndPosition(int i) {
+        return this.getPositionFromLineOffset(this.message.get(i).getEndPosition());
     }
 
     public String getLevel(int i) {

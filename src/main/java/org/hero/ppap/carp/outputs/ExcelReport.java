@@ -4,6 +4,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -56,14 +59,26 @@ public class ExcelReport implements Report {
                 Row row = sheet.getRow(cell.getRowIndex());
                 Cell cell1 = row.getCell(cell.getColumnIndex());
                 Comment cellComment = cell1.getCellComment();
+                Font redFont = workbook.createFont();
+                int defaultFontIndex = cell1.getCellStyle().getFontIndex();
+                redFont.setColor(IndexedColors.RED.getIndex());
+                redFont.setBold(true);
+                RichTextString richTextString = helper.createRichTextString(cell1.getStringCellValue());
+                richTextString.applyFont(0, cell1.getStringCellValue().length(), (short) defaultFontIndex);
 
                 StringBuilder sb = new StringBuilder();
                 int lineNumber = (int) cell.getDebug().count();
                 for (int i = 0; i < lineNumber; i++) {
-                    sb.append(cell.getPosition(i)).append(",")
+                    String startPosition = cell.getStartPosition(i);
+                    sb.append(startPosition).append(",")
                             .append(cell.getLevel(i)).append(",")
                             .append(cell.getMessage(i)).append("\n");
+                    if (startPosition.chars().allMatch(Character::isDigit)) {
+                        richTextString.applyFont(Integer.parseInt(startPosition),
+                                Integer.parseInt(cell.getEndPosition(i)), redFont);
+                    }
                 }
+                cell1.setCellValue(richTextString);
 
                 if (cellComment == null) {
                     var drawing = sheet.createDrawingPatriarch();
@@ -74,7 +89,7 @@ public class ExcelReport implements Report {
                             Units.EMU_PER_PIXEL * 5,
                             cell1.getColumnIndex() + 1,
                             cell1.getRowIndex(),
-                            cell1.getColumnIndex() + 5,
+                            cell1.getColumnIndex() + 6,
                             cell1.getRowIndex() + lineNumber);
                     cellComment = drawing.createCellComment(anchor);
                 }

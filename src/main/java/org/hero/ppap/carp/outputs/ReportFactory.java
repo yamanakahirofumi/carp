@@ -11,7 +11,7 @@ public class ReportFactory {
         switch (resultType) {
             case CSV:
                 return new CSVReport(file);
-            case None:
+            case NONE:
                 return new NoReport();
             case EXCEL:
                 return new ExcelReport(file);
