@@ -46,6 +46,7 @@ public class CARPCell {
                         this.getPositionFromLineOffset(it.getStartPosition()) + "," +
                         it.getLevel().toString() + "," +
                         it.getMessage() + "," +
+                        it.getValidatorName() + "," +
                         this.cellPosition.file().toPath().normalize().toAbsolutePath());
     }
 

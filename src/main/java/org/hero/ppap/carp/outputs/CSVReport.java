@@ -35,6 +35,10 @@ public class CSVReport implements Report {
     }
 
     @Override
+    public void postWrite() {
+    }
+
+    @Override
     public Optional<Path> resultFile() {
         return Optional.of(this.file.toPath());
     }

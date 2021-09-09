@@ -16,6 +16,10 @@ public class NoReport implements Report {
     }
 
     @Override
+    public void postWrite(){
+    }
+
+    @Override
     public Optional<Path> resultFile() {
         return Optional.empty();
     }

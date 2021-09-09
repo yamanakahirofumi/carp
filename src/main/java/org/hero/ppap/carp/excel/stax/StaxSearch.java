@@ -22,7 +22,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class StaxSearch implements ExcelSearch {
-    private final Pattern p = Pattern.compile("([A-Z]+)([0-9]+)");
+    private final Pattern cellPattern = Pattern.compile("([A-Z]+)([0-9]+)");
+    private final Pattern sheetPattern = Pattern.compile("sheet([0-9]+)\\.xml");
 
     @Override
     public Stream<CARPCell> execute(File file) {
@@ -109,7 +110,7 @@ public class StaxSearch implements ExcelSearch {
         boolean value = false;
         String cellPosition = "";
         List<CellPosition> result = new LinkedList<>();
-        int sheetId = Integer.parseInt(path.getFileName().toString().split("\\.")[0].split("t")[1]);
+        int sheetId = Integer.parseInt(this.sheetPattern.matcher(path.getFileName().toString()).replaceFirst("$1"));
         try {
             reader = factory.createXMLStreamReader(Files.newInputStream(fs.getPath(path.toString())));
             while (reader.hasNext()) {
@@ -120,7 +121,8 @@ public class StaxSearch implements ExcelSearch {
                         if (startLocalPart.equals("c")) {
                             cellPosition = reader.getAttributeValue("", "r");
                             cell = true;
-                            if (reader.getAttributeValue("", "t") != null && reader.getAttributeValue("", "t").equals("s")) {
+                            String tAttribute = reader.getAttributeValue("", "t");
+                            if (tAttribute != null && tAttribute.equals("s")) {
                                 share = true;
                             }
                         } else if (startLocalPart.equals("v") && share) {
@@ -138,7 +140,7 @@ public class StaxSearch implements ExcelSearch {
                     case XMLStreamConstants.CHARACTERS:
                         if (value) {
                             int num = Integer.parseInt(reader.getText());
-                            String[] position = p.matcher(cellPosition).replaceAll("$1,$2").split(",");
+                            String[] position = cellPattern.matcher(cellPosition).replaceFirst("$1,$2").split(",");
                             result.add(new CellPosition(file, sheetMap.get(sheetId), sheetId,
                                     Integer.parseInt(position[1]) - 1, this.getNumber(position[0]) - 1, cellPosition,
                                     stringList.get(num)));

@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 
-@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 0.1.5",
+@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 0.1.6-SNAPSHOT",
         description = "Personal Poi And redPen check tool.(Check excel files of A directory by RedPen.)")
 class CarpMain implements Callable<Integer> {
 
@@ -68,6 +68,7 @@ class CarpMain implements Callable<Integer> {
                 .peek(it -> it.setMessage(redPenManager.validate(it.getValue())))
                 .filter(CARPCell::isMessage)
                 .forEach(report::write);
+        report.postWrite();
         return 0;
     }
 

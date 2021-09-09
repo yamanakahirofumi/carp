@@ -11,5 +11,7 @@ public interface Report {
 
     void write(CARPCell cell);
 
+    void postWrite();
+
     Optional<Path> resultFile();
 }
