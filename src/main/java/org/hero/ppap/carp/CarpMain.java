@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 
-@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 0.1.6-SNAPSHOT",
+@Command(name = "carp", mixinStandardHelpOptions = true, version = "CARP 0.1.6",
         description = "Personal Poi And redPen check tool.(Check excel files of A directory by RedPen.)")
 class CarpMain implements Callable<Integer> {
 
